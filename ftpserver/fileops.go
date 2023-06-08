@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -14,15 +13,6 @@ func handleLISTCommand(conn *FTPConn) {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
-
-	// Establish a data connection with the client
-	dataConn, err := conn.connectDataConn()
-	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
-		log.Printf("Err: %s", err)
-		return
-	}
-	defer dataConn.Close()
 
 	// Open the main directory
 	dir, err := os.Open(conn.MainDir)
@@ -42,9 +32,12 @@ func handleLISTCommand(conn *FTPConn) {
 	conn.Write([]byte("150 Opening ASCII mode data connection for file list\r\n"))
 	for _, file := range entries {
 		line := fmt.Sprintf("%s\r\n", file.Name())
-		dataConn.Write([]byte(line))
+		conn.DataConn.Write([]byte(line))
 	}
-
+	conn.DataConn.Close()
+	if conn.IsPassive {
+		conn.DataListener.Close()
+	}
 	conn.Write([]byte("226 Transfer complete\r\n"))
 }
 
@@ -61,14 +54,6 @@ func handleRETRCommand(conn *FTPConn, args []string) {
 
 	filename := args[0]
 
-	// Establish a data connection with the client
-	dataConn, err := conn.connectDataConn()
-	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
-		return
-	}
-	defer dataConn.Close()
-
 	// Construct the absolute path of the file based on the main directory
 	absFilePath := filepath.Join(conn.MainDir, filename)
 
@@ -84,7 +69,7 @@ func handleRETRCommand(conn *FTPConn, args []string) {
 	if conn.TransferMode == "A" {
 		// ASCII mode
 		reader := bufio.NewReader(file)
-		writer := bufio.NewWriter(dataConn)
+		writer := bufio.NewWriter(conn.DataConn)
 
 		// Read and write data line by line in ASCII mode
 		for {
@@ -110,7 +95,7 @@ func handleRETRCommand(conn *FTPConn, args []string) {
 		}
 	} else if conn.TransferMode == "I" {
 		// Binary mode
-		_, err := io.Copy(dataConn, file)
+		_, err := io.Copy(conn.DataConn, file)
 		if err != nil {
 			conn.Write([]byte("451 Error transferring data\r\n"))
 			return
@@ -134,14 +119,6 @@ func handleSTORCommand(conn *FTPConn, args []string) {
 		return
 	}
 
-	// Establish a data connection with the client
-	dataConn, err := conn.connectDataConn()
-	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
-		return
-	}
-	defer dataConn.Close()
-
 	filename := args[0]
 
 	// Construct the absolute path of the file based on the main directory
@@ -158,7 +135,7 @@ func handleSTORCommand(conn *FTPConn, args []string) {
 	// Set the data transfer mode based on the TYPE command
 	if conn.TransferMode == "A" {
 		// ASCII mode
-		reader := bufio.NewReader(dataConn)
+		reader := bufio.NewReader(conn.DataConn)
 		writer := bufio.NewWriter(file)
 
 		// Read and write data line by line in ASCII mode
@@ -185,7 +162,7 @@ func handleSTORCommand(conn *FTPConn, args []string) {
 		}
 	} else if conn.TransferMode == "I" {
 		// Binary mode
-		_, err := io.Copy(file, dataConn)
+		_, err := io.Copy(file, conn.DataConn)
 		if err != nil {
 			conn.Write([]byte("451 Error receiving data\r\n"))
 			return

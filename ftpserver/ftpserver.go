@@ -11,14 +11,12 @@ import (
 // FTPConn represents a connection to the FTP server
 type FTPConn struct {
 	net.Conn
+	DataConn     net.Conn
+	DataListener net.Listener
+	IsPassive    bool
 	Username     string
 	MainDir      string
 	CurrDir      string
-	PassiveMode  bool
-	DataHost     string
-	DataPort     int
-	DataListener net.Listener
-	DataConn     net.Conn
 	TransferMode string
 }
 
@@ -56,9 +54,13 @@ func HandleFTPCommands(conn *FTPConn) {
 		case "STOR":
 			handleSTORCommand(conn, args)
 		case "EPSV":
-			handleEPSVCommand(conn)
+			handleEPSVCommand(conn, args)
 		case "PASV":
-			handlePASVCommand(conn)
+			handlePASVCommand(conn, args)
+		case "LPRT":
+			handleLPRTCommand(conn, args)
+		case "EPRT":
+			handleEPRTCommand(conn, args)
 		case "SYST":
 			handleSYSTCommand(conn)
 		case "TYPE":

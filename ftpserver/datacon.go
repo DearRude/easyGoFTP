@@ -1,118 +1,138 @@
 package ftpserver
 
 import (
-	"net"
-
+	"crypto/tls"
+	"errors"
 	"fmt"
-	"strconv"
+	"log"
+	"net"
 	"strings"
 )
 
-// Establishes a data connection with the client
-func (conn *FTPConn) connectDataConn() (net.Conn, error) {
-	var dataConn net.Conn
-	var err error
-
-	// Check the preferred mode for data connection (PASV or EPSV)
-	if conn.PassiveMode {
-		// PASV mode: Accept the client's connection
-		dataConn, err = conn.acceptDataConn()
-	} else {
-		// EPSV mode: Dial a connection to the client
-		dataConn, err = conn.dialDataConn()
+func handleLPRTCommand(conn *FTPConn, args []string) {
+	if len(args) == 0 {
+		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		return
 	}
 
-	return dataConn, err
+	err := establishActiveDataConnection(conn, args[0])
+	if err != nil {
+		conn.Write([]byte("425 Can't open data connection\r\n"))
+		return
+	}
+
+	conn.Write([]byte("200 Active data connection established\r\n"))
 }
 
-// Accepts the client's data connection (PASV mode)
-func (conn *FTPConn) acceptDataConn() (net.Conn, error) {
-	dataConn, err := conn.DataListener.Accept()
-	if err != nil {
-		return nil, err
+func handleEPRTCommand(conn *FTPConn, args []string) {
+	if len(args) == 0 {
+		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		return
 	}
 
-	return dataConn, nil
+	conn.Write([]byte("200 Active data connection established\r\n"))
+	err := establishActiveDataConnection(conn, args[0])
+	if err != nil {
+		conn.Write([]byte("425 Can't open data connection\r\n"))
+		return
+	}
 }
 
-// Dials a connection to the client's data connection (EPSV mode)
-func (conn *FTPConn) dialDataConn() (net.Conn, error) {
-	epsvResponse := fmt.Sprintf("229 Entering Extended Passive Mode (|||%d|)\r\n", conn.DataPort)
-	conn.Write([]byte(epsvResponse))
-
-	dataConn, err := net.Dial("tcp", conn.DataHost+":"+strconv.Itoa(conn.DataPort))
-	if err != nil {
-		return nil, err
+func handleEPSVCommand(conn *FTPConn, args []string) {
+	if len(args) > 0 {
+		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		return
 	}
 
-	return dataConn, nil
+	err := establishPassiveDataConnection(conn)
+	if err != nil {
+		conn.Write([]byte("425 Can't open data connection\r\n"))
+		return
+	}
+
+	port := conn.DataListener.Addr().(*net.TCPAddr).Port
+	conn.Write([]byte(fmt.Sprintf("229 Entering Extended Passive Mode (|||%d|)\r\n", port)))
+
+	if conn.DataConn, err = conn.DataListener.Accept(); err != nil {
+		conn.Write([]byte("425 Can't open data connection\r\n"))
+	}
 }
 
-func handleEPSVCommand(conn *FTPConn) {
-	if !IsAuthenticated(conn) {
-		conn.Write([]byte("530 Not logged in\r\n"))
+func handlePASVCommand(conn *FTPConn, args []string) {
+	if len(args) > 0 {
+		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
-	// Prepare to listen for incoming data connections
-	dataListener, err := net.Listen("tcp", ":0")
+	err := establishPassiveDataConnection(conn)
 	if err != nil {
-		conn.Write([]byte("500 Failed to set up data connection\r\n"))
+		conn.Write([]byte("425 Can't open data connection\r\n"))
 		return
 	}
 
-	// Get the port number on which the data connection is listening
-	_, dataPortStr, err := net.SplitHostPort(dataListener.Addr().String())
-	if err != nil {
-		conn.Write([]byte("500 Failed to get data connection port\r\n"))
-		return
+	ip := conn.DataConn.LocalAddr().(*net.TCPAddr).IP
+	port := conn.DataConn.LocalAddr().(*net.TCPAddr).Port
+
+	ipParts := strings.Split(ip.String(), ".")
+	portHigh := port / 256
+	portLow := port % 256
+
+	conn.Write([]byte(fmt.Sprintf("227 Entering Passive Mode (%s,%s,%s,%s,%d,%d)\r\n", ipParts[0], ipParts[1], ipParts[2], ipParts[3], portHigh, portLow)))
+	if conn.DataConn, err = conn.DataListener.Accept(); err != nil {
+		conn.Write([]byte("425 Can't open data connection\r\n"))
 	}
-
-	// Convert the port number to an integer
-	dataPort, err := strconv.Atoi(dataPortStr)
-	if err != nil {
-		conn.Write([]byte("500 Failed to parse data connection port\r\n"))
-		return
-	}
-
-	// Build the response string with the port number
-	response := fmt.Sprintf("229 Entering Extended Passive Mode (|||%d|)\r\n", dataPort)
-
-	// Send the response to the client
-	conn.Write([]byte(response))
 }
 
-func handlePASVCommand(conn *FTPConn) {
-	if !IsAuthenticated(conn) {
-		conn.Write([]byte("530 Not logged in\r\n"))
-		return
-	}
-
-	// Prepare to listen for incoming data connections
-	dataListener, err := net.Listen("tcp", ":0")
+func establishActiveDataConnection(conn *FTPConn, addr string) error {
+	protocol, ip, port, err := parseAddress(addr)
 	if err != nil {
-		conn.Write([]byte("500 Failed to set up data connection\r\n"))
-		return
+		return err
 	}
 
-	// Get the host and port information for the data connection
-	host, portStr, err := net.SplitHostPort(dataListener.Addr().String())
+	host := net.JoinHostPort(ip, port)
+
+	switch protocol {
+	case "1", "2": // Use TCP
+		dataConn, err := net.Dial("tcp", host)
+		if err != nil {
+			return err
+		}
+		conn.DataConn = dataConn
+	// case "2": // Use TCP with SSL/TLS
+	// 	tlsConfig := &tls.Config{
+	// 		InsecureSkipVerify: true, // Disable certificate verification (for testing purposes)
+	// 	}
+
+	// 	dataConn, err := tls.Dial("tcp", host, tlsConfig)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	conn.DataConn = dataConn
+	default:
+		return errors.New("Unsupported data connection protocol")
+	}
+	log.Println("Active connection set")
+
+	return nil
+}
+
+func establishPassiveDataConnection(conn *FTPConn) error {
+	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
-		conn.Write([]byte("500 Failed to get data connection details\r\n"))
-		return
+		return err
 	}
 
-	// Parse the port number from the string
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		conn.Write([]byte("500 Failed to parse data connection port\r\n"))
-		return
+	conn.DataListener = listener
+	conn.IsPassive = true
+	return nil
+}
+
+func parseAddress(addr string) (string, string, string, error) {
+	parts := strings.Split(addr, "|")
+	if len(parts) < 4 {
+		return "", "", "", fmt.Errorf("invalid address format")
 	}
 
-	// Build the response string with the host and port information
-	response := fmt.Sprintf("227 Entering Passive Mode (%s,%d,%d)\r\n",
-		strings.ReplaceAll(host, ".", ","), port/256, port%256)
-
-	// Send the response to the client
-	conn.Write([]byte(response))
+	// proto, ip, port, error
+	return parts[1], parts[2], parts[3], nil
 }
