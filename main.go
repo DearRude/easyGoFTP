@@ -93,6 +93,7 @@ func handleLISTCommand(conn *FTPConn) {
 	dataConn, err := conn.connectDataConn()
 	if err != nil {
 		conn.Write([]byte("425 Can't open data connection\r\n"))
+		log.Printf("Err: %s", err)
 		return
 	}
 	defer dataConn.Close()
@@ -405,6 +406,17 @@ func handleTYPECommand(conn *FTPConn, args []string) {
 	}
 }
 
+func handleSYSTCommand(conn *FTPConn) {
+	if !isAuthenticated(conn) {
+		conn.Write([]byte("530 Not logged in\r\n"))
+		return
+	}
+
+	// Send the system information as the response
+	response := "215 UNIX Type: L8\r\n"
+	conn.Write([]byte(response))
+}
+
 func isAuthenticated(conn *FTPConn) bool {
 	// Check if the username exists in the password database
 	_, ok := userPasswords[conn.Username]
@@ -443,6 +455,8 @@ func handleFTPCommands(conn *FTPConn) {
 			handleEPSVCommand(conn)
 		case "PASV":
 			handlePASVCommand(conn)
+		case "SYST":
+			handleSYSTCommand(conn)
 		case "TYPE":
 			handleTYPECommand(conn, args)
 		case "QUIT":
