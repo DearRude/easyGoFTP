@@ -20,9 +20,11 @@ func handleTYPECommand(conn *FTPConn, args []string) {
 	switch mode {
 	case "A":
 		// ASCII mode
+		conn.TransferMode = "A"
 		conn.Write([]byte("200 Switching to ASCII mode\r\n"))
 	case "I":
 		// Binary mode
+		conn.TransferMode = "I"
 		conn.Write([]byte("200 Switching to binary mode\r\n"))
 	default:
 		conn.Write([]byte("504 Command not implemented for that parameter\r\n"))

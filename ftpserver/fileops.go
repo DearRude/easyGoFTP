@@ -64,6 +64,7 @@ func handleRETRCommand(conn *FTPConn, args []string) {
 		return
 	}
 	defer file.Close()
+	conn.Write([]byte("150 File status okay\r\n"))
 
 	// Set the data transfer mode based on the TYPE command
 	if conn.TransferMode == "A" {
@@ -105,6 +106,11 @@ func handleRETRCommand(conn *FTPConn, args []string) {
 		conn.Write([]byte("504 Command not implemented for that parameter\r\n"))
 		return
 	}
+
+	conn.DataConn.Close()
+	if conn.IsPassive {
+		conn.DataListener.Close()
+	}
 	conn.Write([]byte("226 Transfer complete\r\n"))
 }
 
@@ -121,8 +127,8 @@ func handleSTORCommand(conn *FTPConn, args []string) {
 
 	filename := args[0]
 
-	// Construct the absolute path of the file based on the main directory
-	absFilePath := filepath.Join(conn.MainDir, filename)
+	// Construct the absolute path of the file based on the current directory
+	absFilePath := filepath.Join(conn.CurrDir, filename)
 
 	// Create or open the file for writing
 	file, err := os.Create(absFilePath)
@@ -131,6 +137,7 @@ func handleSTORCommand(conn *FTPConn, args []string) {
 		return
 	}
 	defer file.Close()
+	conn.Write([]byte("150 File status okay\r\n"))
 
 	// Set the data transfer mode based on the TYPE command
 	if conn.TransferMode == "A" {
@@ -173,5 +180,9 @@ func handleSTORCommand(conn *FTPConn, args []string) {
 		return
 	}
 
+	conn.DataConn.Close()
+	if conn.IsPassive {
+		conn.DataListener.Close()
+	}
 	conn.Write([]byte("226 Transfer complete\r\n"))
 }

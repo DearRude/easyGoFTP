@@ -1,7 +1,7 @@
 package ftpserver
 
 import (
-	"crypto/tls"
+	//	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
