@@ -13,6 +13,7 @@ type FTPConn struct {
 	net.Conn
 	Username     string
 	MainDir      string
+	CurrDir      string
 	PassiveMode  bool
 	DataHost     string
 	DataPort     int
@@ -44,6 +45,10 @@ func HandleFTPCommands(conn *FTPConn) {
 			handleUSERCommand(conn, args)
 		case "PASS":
 			handlePASSCommand(conn, args)
+		case "CWD":
+			handleCWDCommand(conn, args)
+		case "MKD":
+			handleMKDCommand(conn, args)
 		case "LIST":
 			handleLISTCommand(conn)
 		case "RETR":

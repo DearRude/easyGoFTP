@@ -2,6 +2,8 @@ package ftpserver
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,6 +57,22 @@ func handlePASSCommand(conn *FTPConn, args []string) {
 	if err != nil {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
+	}
+
+	// Change maindir to user
+	user_dir := filepath.Join(conn.MainDir, conn.Username)
+
+	// Check if user subdirectory exists, if not create it
+	if _, err := os.Stat(user_dir); os.IsNotExist(err) {
+		err := os.Mkdir(user_dir, 0755)
+		if err != nil {
+			log.Printf("Failed to create subdirectory %s: %v", user_dir, err)
+			return
+		}
+		log.Printf("Subdirectory created: %s", user_dir)
+	} else {
+		conn.MainDir = user_dir
+		conn.CurrDir = user_dir
 	}
 
 	log.Printf("Connection authenticaed with username %s", conn.Username)
