@@ -18,11 +18,11 @@ func handleTYPECommand(conn *FTPConn, args []string) {
 
 	mode := strings.ToUpper(args[0])
 	switch mode {
-	case "A":
+	case "A", "A N":
 		// ASCII mode
 		conn.TransferMode = "A"
 		conn.Write([]byte("200 Switching to ASCII mode\r\n"))
-	case "I":
+	case "I", "L 8":
 		// Binary mode
 		conn.TransferMode = "I"
 		conn.Write([]byte("200 Switching to binary mode\r\n"))
