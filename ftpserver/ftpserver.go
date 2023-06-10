@@ -63,6 +63,10 @@ func HandleFTPCommands(conn *FTPConn) {
 			handleEPRTCommand(conn, args)
 		case "SYST":
 			handleSYSTCommand(conn)
+		case "STRU":
+			handleSTRUCommand(conn, args)
+		case "MODE":
+			handleMODECommand(conn, args)
 		case "TYPE":
 			handleTYPECommand(conn, args)
 		case "QUIT":
