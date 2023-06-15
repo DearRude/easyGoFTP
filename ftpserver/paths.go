@@ -6,7 +6,7 @@ import (
 )
 
 // handleCWDCommand handles the CWD command
-func handleCWDCommand(conn *FTPConn, args []string) {
+func handleCWDCommand(conn *FTPServer, args []string) {
 	if !IsAuthenticated(conn) {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
@@ -29,7 +29,7 @@ func handleCWDCommand(conn *FTPConn, args []string) {
 }
 
 // updateWorkingDir updates the current working directory for the FTP connection
-func updateWorkingDir(conn *FTPConn, targetDir string) bool {
+func updateWorkingDir(conn *FTPServer, targetDir string) bool {
 	fullPath := filepath.Join(conn.CurrDir, targetDir)
 	if filepath.IsAbs(targetDir) {
 		fullPath = filepath.Join(conn.MainDir, targetDir)
@@ -49,7 +49,7 @@ func updateWorkingDir(conn *FTPConn, targetDir string) bool {
 }
 
 // handleMKDCommand handles the MKD command
-func handleMKDCommand(conn *FTPConn, args []string) {
+func handleMKDCommand(conn *FTPServer, args []string) {
 	if !IsAuthenticated(conn) {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return

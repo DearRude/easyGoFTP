@@ -3,8 +3,8 @@ package main
 import (
 	"net"
 
+	"crypto/tls"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -12,32 +12,45 @@ import (
 )
 
 func main() {
-	port := 21211
+	c := GenConfig()
 
 	cur_dir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Failed to get current directory:", err)
+		c.StderrLogger.Println("Failed to get current directory:", err)
 		return
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	// If secure, handle TLS
+	tlsConfig := &tls.Config{}
+	if c.UseTLS {
+		tlsConfig = fs.GetTLSConfig(c.Domain)
+	}
+
+	// Init FTP server
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", c.Port))
 	if err != nil {
-		panic(err)
+		c.StderrLogger.Println("Failed to start the FTP server on designated port:", err)
+		return
 	}
 	defer listener.Close()
-	log.Printf("FTP server started on port %d\n", port)
+	c.StdoutLogger.Printf("FTP server started on port %d\n", c.Port)
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			panic(err)
+			c.StderrLogger.Println("Connection could not be accepted", err)
+			continue
 		}
-		log.Printf("Connection accepted from %s", conn.RemoteAddr())
+		c.StdoutLogger.Printf("Connection accepted from %s", conn.RemoteAddr())
 		conn.Write([]byte("220 Service ready for new user\r\n"))
 
-		ftpConn := fs.FTPConn{
-			Conn:    conn,
-			MainDir: filepath.Join(cur_dir, "files"),
+		ftpConn := fs.FTPServer{
+			Logger:    &c.StdoutLogger,
+			ErrLogger: &c.StderrLogger,
+			UseTLS:    c.UseTLS,
+			TLSConf:   tlsConfig,
+			Conn:      conn,
+			MainDir:   filepath.Join(cur_dir, "files"),
 		}
 
 		go fs.HandleFTPCommands(&ftpConn)

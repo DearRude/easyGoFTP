@@ -1,6 +1,6 @@
 package ftpserver
 
-func handleSTRUCommand(conn *FTPConn, args []string) {
+func handleSTRUCommand(conn *FTPServer, args []string) {
 	if len(args) == 1 && args[0] == "F" {
 		conn.Write([]byte("200 Obsolete verb accepted"))
 	} else {
@@ -8,7 +8,7 @@ func handleSTRUCommand(conn *FTPConn, args []string) {
 	}
 }
 
-func handleMODECommand(conn *FTPConn, args []string) {
+func handleMODECommand(conn *FTPServer, args []string) {
 	if len(args) == 1 && args[0] == "S" {
 		conn.Write([]byte("200 Obsolete verb accepted"))
 	} else {

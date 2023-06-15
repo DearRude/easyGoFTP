@@ -15,7 +15,7 @@ var userPasswords = map[string]string{
 	"user_3": "$2a$10$4St/8SvmVkzrWkkau67pl.lRJ5E9iMxmOnY5LAIJabpVGANgXrhsa",
 }
 
-func handleUSERCommand(conn *FTPConn, args []string) {
+func handleUSERCommand(conn *FTPServer, args []string) {
 	if len(args) < 1 {
 		conn.Write([]byte("501 Syntax error in parameters\r\n"))
 		return
@@ -37,7 +37,7 @@ func handleUSERCommand(conn *FTPConn, args []string) {
 	conn.Write([]byte("331 User name okay, need password\r\n"))
 }
 
-func handlePASSCommand(conn *FTPConn, args []string) {
+func handlePASSCommand(conn *FTPServer, args []string) {
 	if len(args) < 1 {
 		conn.Write([]byte("501 Syntax error in parameters\r\n"))
 		return
@@ -79,7 +79,7 @@ func handlePASSCommand(conn *FTPConn, args []string) {
 	conn.Write([]byte("230 User logged in, proceed\r\n"))
 }
 
-func IsAuthenticated(conn *FTPConn) bool {
+func IsAuthenticated(conn *FTPServer) bool {
 	// Check if the username exists in the password database
 	_, ok := userPasswords[conn.Username]
 	return ok

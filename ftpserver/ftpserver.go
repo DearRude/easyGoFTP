@@ -1,6 +1,7 @@
 package ftpserver
 
 import (
+	"crypto/tls"
 	"net"
 
 	"bufio"
@@ -8,9 +9,16 @@ import (
 	"strings"
 )
 
-// FTPConn represents a connection to the FTP server
-type FTPConn struct {
+// FTPServer represents a connection to the FTP server
+type FTPServer struct {
 	net.Conn
+
+	Logger    *log.Logger
+	ErrLogger *log.Logger
+
+	UseTLS  bool
+	TLSConf *tls.Config
+
 	DataConn     net.Conn
 	DataListener net.Listener
 	IsPassive    bool
@@ -21,7 +29,7 @@ type FTPConn struct {
 }
 
 // handleFTPCommands handles the FTP commands received on the connection
-func HandleFTPCommands(conn *FTPConn) {
+func HandleFTPCommands(conn *FTPServer) {
 	reader := bufio.NewReader(conn)
 
 	for {

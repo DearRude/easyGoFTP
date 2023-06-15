@@ -1,15 +1,14 @@
 package ftpserver
 
 import (
-	//	"crypto/tls"
+	"crypto/tls"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 )
 
-func handleLPRTCommand(conn *FTPConn, args []string) {
+func handleLPRTCommand(conn *FTPServer, args []string) {
 	if len(args) == 0 {
 		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
@@ -24,7 +23,7 @@ func handleLPRTCommand(conn *FTPConn, args []string) {
 	conn.Write([]byte("200 Active data connection established\r\n"))
 }
 
-func handleEPRTCommand(conn *FTPConn, args []string) {
+func handleEPRTCommand(conn *FTPServer, args []string) {
 	if len(args) == 0 {
 		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
@@ -38,7 +37,7 @@ func handleEPRTCommand(conn *FTPConn, args []string) {
 	}
 }
 
-func handleEPSVCommand(conn *FTPConn, args []string) {
+func handleEPSVCommand(conn *FTPServer, args []string) {
 	if len(args) > 0 {
 		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
@@ -58,7 +57,7 @@ func handleEPSVCommand(conn *FTPConn, args []string) {
 	}
 }
 
-func handlePASVCommand(conn *FTPConn, args []string) {
+func handlePASVCommand(conn *FTPServer, args []string) {
 	if len(args) > 0 {
 		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
@@ -83,7 +82,7 @@ func handlePASVCommand(conn *FTPConn, args []string) {
 	}
 }
 
-func establishActiveDataConnection(conn *FTPConn, addr string) error {
+func establishActiveDataConnection(conn *FTPServer, addr string) error {
 	protocol, ip, port, err := parseAddress(addr)
 	if err != nil {
 		return err
@@ -92,36 +91,45 @@ func establishActiveDataConnection(conn *FTPConn, addr string) error {
 	host := net.JoinHostPort(ip, port)
 
 	switch protocol {
-	case "1", "2": // Use TCP
+	case "1": // Use TCP
 		dataConn, err := net.Dial("tcp", host)
 		if err != nil {
 			return err
 		}
 		conn.DataConn = dataConn
-	// case "2": // Use TCP with SSL/TLS
-	// 	tlsConfig := &tls.Config{
-	// 		InsecureSkipVerify: true, // Disable certificate verification (for testing purposes)
-	// 	}
-
-	// 	dataConn, err := tls.Dial("tcp", host, tlsConfig)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	conn.DataConn = dataConn
+	case "2": // Use TCP with SSL/TLS
+		var dataConn net.Conn
+		if !conn.UseTLS { // If TLS is disabled, use TCP
+			if dataConn, err = net.Dial("tcp", host); err != nil {
+				return err
+			}
+		} else {
+			if dataConn, err = tls.Dial("tcp", host, conn.TLSConf); err != nil {
+				return err
+			}
+		}
+		conn.DataConn = dataConn
 	default:
 		return errors.New("Unsupported data connection protocol")
 	}
-	log.Println("Active connection set")
 
+	conn.Logger.Println("Active connection set")
 	return nil
 }
 
-func establishPassiveDataConnection(conn *FTPConn) error {
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		return err
-	}
+func establishPassiveDataConnection(conn *FTPServer) error {
+	var listener net.Listener
+	var err error
 
+	if !conn.UseTLS { // If TLS is disabled, use TCP
+		if listener, err = net.Listen("tcp", ":0"); err != nil {
+			return err
+		}
+	} else {
+		if listener, err = tls.Listen("tcp", ":0", conn.TLSConf); err != nil {
+			return err
+		}
+	}
 	conn.DataListener = listener
 	conn.IsPassive = true
 	return nil

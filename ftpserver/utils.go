@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func handleTYPECommand(conn *FTPConn, args []string) {
+func handleTYPECommand(conn *FTPServer, args []string) {
 	if !IsAuthenticated(conn) {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
@@ -31,7 +31,7 @@ func handleTYPECommand(conn *FTPConn, args []string) {
 	}
 }
 
-func handleSYSTCommand(conn *FTPConn) {
+func handleSYSTCommand(conn *FTPServer) {
 	if !IsAuthenticated(conn) {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return

@@ -23,3 +23,7 @@ go.work
 
 # FTP files
 files
+
+
+# Env file
+.env

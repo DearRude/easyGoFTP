@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func handleLISTCommand(conn *FTPConn) {
+func handleLISTCommand(conn *FTPServer) {
 	if conn.Username == "" {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
@@ -41,7 +41,7 @@ func handleLISTCommand(conn *FTPConn) {
 	conn.Write([]byte("226 Transfer complete\r\n"))
 }
 
-func handleRETRCommand(conn *FTPConn, args []string) {
+func handleRETRCommand(conn *FTPServer, args []string) {
 	if conn.Username == "" {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
@@ -114,7 +114,7 @@ func handleRETRCommand(conn *FTPConn, args []string) {
 	conn.Write([]byte("226 Transfer complete\r\n"))
 }
 
-func handleSTORCommand(conn *FTPConn, args []string) {
+func handleSTORCommand(conn *FTPServer, args []string) {
 	if conn.Username == "" {
 		conn.Write([]byte("530 Not logged in\r\n"))
 		return
