@@ -1,0 +1,15 @@
+schema = 3
+
+[mod]
+  [mod."github.com/peterbourgon/ff/v3"]
+    version = "v3.3.2"
+    hash = "sha256-xoUqKcCpPgUY/Fi9bzZGR/Eir5UDSCK6No3YXpTd4YM="
+  [mod."golang.org/x/crypto"]
+    version = "v0.9.0"
+    hash = "sha256-RpGvWrx96GBXpu1zsWxdv9/+WcRmjBxOC7fvSgOJGL0="
+  [mod."golang.org/x/net"]
+    version = "v0.10.0"
+    hash = "sha256-HkGiUYBZOBdOtt7mYo3N3swFjjAXzW++pG2JeWGJR9Q="
+  [mod."golang.org/x/text"]
+    version = "v0.9.0"
+    hash = "sha256-tkhDeMsSQZr3jo7vmKehWs3DvWetwXR0IB+DCLbQ4nk="
