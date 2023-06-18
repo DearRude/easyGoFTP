@@ -1,0 +1,72 @@
+name: ci/cd
+
+on:
+  push:
+    branches: ["master"]
+    paths-ignore:
+      - "**.md"
+      - "**.org"
+
+jobs:
+  lint-nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: nixbuild/nix-quick-install-action@v16
+        with:
+          nix_conf: experimental-features = nix-command flakes
+      - uses: actions/checkout@v3
+      - name: Check format
+        run: nix run nixpkgs#nixfmt -- --check *.nix
+
+  lint-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.12
+      - uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+
+  build-nix:
+    needs: [lint-go, lint-nix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nixbuild/nix-quick-install-action@v16
+        with:
+          nix_conf: experimental-features = nix-command flakes
+      - uses: cachix/cachix-action@v10
+        with:
+          name: butter-robot
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - run: nix build .
+
+  build-docker:
+    needs: lint-go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.12
+      - uses: actions/checkout@v3
+      - uses: imjasonh/setup-ko@v0.5
+      - run: ko build -B ./
+        env:
+          KO_DOCKER_REPO: ghcr.io/dearrude
+
+  deployment:
+    needs: build-docker
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DOCKER_HOST }}
+          username: ${{ secrets.DOCKER_USER }}
+          key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+          script: |
+            cd butter-robot
+            docker-compose pull && docker-compose up --force-recreate -d
