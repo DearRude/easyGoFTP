@@ -28,7 +28,6 @@ jobs:
       - uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          install-mode: "goinstall"
           args: --timeout=5m
 
   build-nix:
