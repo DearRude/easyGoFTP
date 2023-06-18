@@ -16,7 +16,7 @@ jobs:
           nix_conf: experimental-features = nix-command flakes
       - uses: actions/checkout@v3
       - name: Check format
-        run: nix run nixpkgs#nixfmt -- --check *.nix
+        run: nix run nixpkgs#nixpkgs-fmt -- --check *.nix
 
   lint-go:
     runs-on: ubuntu-latest
