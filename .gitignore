@@ -19,7 +19,7 @@
 
 # Go workspace file
 go.work
-result/
+result
 
 
 # FTP files
