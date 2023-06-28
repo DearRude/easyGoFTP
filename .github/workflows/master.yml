@@ -27,7 +27,7 @@ jobs:
           go-version: 1.20
       - uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
+          version: v1.53
           args: --timeout=5m
 
   build-nix:
@@ -56,17 +56,3 @@ jobs:
       - run: ko build -B ./
         env:
           KO_DOCKER_REPO: ghcr.io/dearrude
-
-  deployment:
-    needs: build-docker
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DOCKER_HOST }}
-          username: ${{ secrets.DOCKER_USER }}
-          key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
-          script: |
-            cd butter-robot
-            docker-compose pull && docker-compose up --force-recreate -d
