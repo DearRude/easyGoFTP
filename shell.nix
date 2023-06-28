@@ -12,7 +12,7 @@
 let goEnv = pkgs.mkGoEnv { pwd = ./.; };
 in pkgs.mkShell {
   packages = [
-    pkgs.go_1_19
+    pkgs.go
     pkgs.gomod2nix
 
     pkgs.gotools
