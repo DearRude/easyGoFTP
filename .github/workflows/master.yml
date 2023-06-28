@@ -51,11 +51,16 @@ jobs:
 
   build-docker:
     needs: lint-go
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [1.20.x]
+        platform: [ubuntu-latest]
+
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.20
+          go-version: ${{ matrix.go-version }}
       - uses: actions/checkout@v3
       - uses: imjasonh/setup-ko@v0.6
       - run: ko build -B ./
