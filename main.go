@@ -42,7 +42,7 @@ func main() {
 			continue
 		}
 		c.StdoutLogger.Printf("Connection accepted from %s", conn.RemoteAddr())
-		conn.Write([]byte("220 Service ready for new user\r\n"))
+		_, _ = conn.Write([]byte("220 Service ready for new user\r\n"))
 
 		ftpConn := fs.FTPServer{
 			Logger:    &c.StdoutLogger,

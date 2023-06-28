@@ -7,12 +7,12 @@ import (
 
 func handleTYPECommand(conn *FTPServer, args []string) {
 	if !IsAuthenticated(conn) {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
 	if len(args) < 1 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
@@ -21,19 +21,19 @@ func handleTYPECommand(conn *FTPServer, args []string) {
 	case "A", "A N":
 		// ASCII mode
 		conn.TransferMode = "A"
-		conn.Write([]byte("200 Switching to ASCII mode\r\n"))
+		_, _ = conn.Write([]byte("200 Switching to ASCII mode\r\n"))
 	case "I", "L 8":
 		// Binary mode
 		conn.TransferMode = "I"
-		conn.Write([]byte("200 Switching to binary mode\r\n"))
+		_, _ = conn.Write([]byte("200 Switching to binary mode\r\n"))
 	default:
-		conn.Write([]byte("504 Command not implemented for that parameter\r\n"))
+		_, _ = conn.Write([]byte("504 Command not implemented for that parameter\r\n"))
 	}
 }
 
 func handleSYSTCommand(conn *FTPServer) {
 	if !IsAuthenticated(conn) {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
@@ -52,5 +52,5 @@ func handleSYSTCommand(conn *FTPServer) {
 
 	// Send the system information as the response
 	response := "215 " + systemType + " Type: L8\r\n"
-	conn.Write([]byte(response))
+	_, _ = conn.Write([]byte(response))
 }

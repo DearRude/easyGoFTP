@@ -3,17 +3,18 @@ package ftpserver
 import (
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // handleCWDCommand handles the CWD command
 func handleCWDCommand(conn *FTPServer, args []string) {
 	if !IsAuthenticated(conn) {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
 	if len(args) < 1 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
@@ -22,9 +23,9 @@ func handleCWDCommand(conn *FTPServer, args []string) {
 
 	// Update the current working directory for the FTP connection
 	if updateWorkingDir(conn, targetDir) {
-		conn.Write([]byte("250 Directory successfully changed\r\n"))
+		_, _ = conn.Write([]byte("250 Directory successfully changed\r\n"))
 	} else {
-		conn.Write([]byte("550 Requested action not taken. Directory not found\r\n"))
+		_, _ = conn.Write([]byte("550 Requested action not taken. Directory not found\r\n"))
 	}
 }
 
@@ -41,7 +42,7 @@ func updateWorkingDir(conn *FTPServer, targetDir string) bool {
 	}
 
 	// Check if it's not parent of maindir
-	if !filepath.HasPrefix(fullPath, conn.MainDir) {
+	if !strings.HasPrefix(fullPath, conn.MainDir) {
 		return false
 	}
 	conn.CurrDir = fullPath
@@ -51,12 +52,12 @@ func updateWorkingDir(conn *FTPServer, targetDir string) bool {
 // handleMKDCommand handles the MKD command
 func handleMKDCommand(conn *FTPServer, args []string) {
 	if !IsAuthenticated(conn) {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
 	if len(args) < 1 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
@@ -67,17 +68,17 @@ func handleMKDCommand(conn *FTPServer, args []string) {
 	fullPath := filepath.Join(conn.CurrDir, dirName)
 
 	// Check if it's not parent of maindir
-	if !filepath.HasPrefix(fullPath, conn.MainDir) {
-		conn.Write([]byte("550 Requested action not taken. Directory localtion is not permissable\r\n"))
+	if !strings.HasPrefix(fullPath, conn.MainDir) {
+		_, _ = conn.Write([]byte("550 Requested action not taken. Directory localtion is not permissable\r\n"))
 		return
 	}
 
 	// Create the directory
 	err := os.Mkdir(fullPath, 0777)
 	if err != nil {
-		conn.Write([]byte("550 Requested action not taken. Failed to create directory\r\n"))
+		_, _ = conn.Write([]byte("550 Requested action not taken. Failed to create directory\r\n"))
 		return
 	}
 
-	conn.Write([]byte("250 Directory created successfully\r\n"))
+	_, _ = conn.Write([]byte("250 Directory created successfully\r\n"))
 }

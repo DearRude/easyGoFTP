@@ -35,7 +35,7 @@ func HandleFTPCommands(conn *FTPServer) {
 	for {
 		command, err := reader.ReadString('\n')
 		if err != nil {
-			conn.Write([]byte("500 Error reading command\r\n"))
+			_, _ = conn.Write([]byte("500 Error reading command\r\n"))
 			return
 		}
 
@@ -78,11 +78,11 @@ func HandleFTPCommands(conn *FTPServer) {
 		case "TYPE":
 			handleTYPECommand(conn, args)
 		case "QUIT":
-			conn.Write([]byte("221 Goodbye\r\n"))
+			_, _ = conn.Write([]byte("221 Goodbye\r\n"))
 			conn.Close()
 			return
 		default:
-			conn.Write([]byte("502 Command not implemented\r\n"))
+			_, _ = conn.Write([]byte("502 Command not implemented\r\n"))
 		}
 	}
 }

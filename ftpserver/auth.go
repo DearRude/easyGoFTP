@@ -17,7 +17,7 @@ var userPasswords = map[string]string{
 
 func handleUSERCommand(conn *FTPServer, args []string) {
 	if len(args) < 1 {
-		conn.Write([]byte("501 Syntax error in parameters\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters\r\n"))
 		return
 	}
 
@@ -26,7 +26,7 @@ func handleUSERCommand(conn *FTPServer, args []string) {
 	// Check if the username exists in the password database
 	_, ok := userPasswords[username]
 	if !ok {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
@@ -34,12 +34,12 @@ func handleUSERCommand(conn *FTPServer, args []string) {
 	conn.Username = username
 
 	log.Printf("Connection requested with username %s", conn.Username)
-	conn.Write([]byte("331 User name okay, need password\r\n"))
+	_, _ = conn.Write([]byte("331 User name okay, need password\r\n"))
 }
 
 func handlePASSCommand(conn *FTPServer, args []string) {
 	if len(args) < 1 {
-		conn.Write([]byte("501 Syntax error in parameters\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters\r\n"))
 		return
 	}
 
@@ -48,14 +48,14 @@ func handlePASSCommand(conn *FTPServer, args []string) {
 	// Retrieve the previously stored hashed password for the user
 	hashedPassword, ok := userPasswords[conn.Username]
 	if !ok {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
 	// Compare the provided password with the stored hashed password
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		conn.Write([]byte("530 Not logged in\r\n"))
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
@@ -76,7 +76,7 @@ func handlePASSCommand(conn *FTPServer, args []string) {
 	}
 
 	log.Printf("Connection authenticaed with username %s", conn.Username)
-	conn.Write([]byte("230 User logged in, proceed\r\n"))
+	_, _ = conn.Write([]byte("230 User logged in, proceed\r\n"))
 }
 
 func IsAuthenticated(conn *FTPServer) bool {

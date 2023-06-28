@@ -10,62 +10,62 @@ import (
 
 func handleLPRTCommand(conn *FTPServer, args []string) {
 	if len(args) == 0 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
 	err := establishActiveDataConnection(conn, args[0])
 	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
+		_, _ = conn.Write([]byte("425 Can't open data connection\r\n"))
 		return
 	}
 
-	conn.Write([]byte("200 Active data connection established\r\n"))
+	_, _ = conn.Write([]byte("200 Active data connection established\r\n"))
 }
 
 func handleEPRTCommand(conn *FTPServer, args []string) {
 	if len(args) == 0 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
-	conn.Write([]byte("200 Active data connection established\r\n"))
+	_, _ = conn.Write([]byte("200 Active data connection established\r\n"))
 	err := establishActiveDataConnection(conn, args[0])
 	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
+		_, _ = conn.Write([]byte("425 Can't open data connection\r\n"))
 		return
 	}
 }
 
 func handleEPSVCommand(conn *FTPServer, args []string) {
 	if len(args) > 0 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
 	err := establishPassiveDataConnection(conn)
 	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
+		_, _ = conn.Write([]byte("425 Can't open data connection\r\n"))
 		return
 	}
 
 	port := conn.DataListener.Addr().(*net.TCPAddr).Port
-	conn.Write([]byte(fmt.Sprintf("229 Entering Extended Passive Mode (|||%d|)\r\n", port)))
+	_, _ = conn.Write([]byte(fmt.Sprintf("229 Entering Extended Passive Mode (|||%d|)\r\n", port)))
 
 	if conn.DataConn, err = conn.DataListener.Accept(); err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
+		_, _ = conn.Write([]byte("425 Can't open data connection\r\n"))
 	}
 }
 
 func handlePASVCommand(conn *FTPServer, args []string) {
 	if len(args) > 0 {
-		conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
+		_, _ = conn.Write([]byte("501 Syntax error in parameters or arguments\r\n"))
 		return
 	}
 
 	err := establishPassiveDataConnection(conn)
 	if err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
+		_, _ = conn.Write([]byte("425 Can't open data connection\r\n"))
 		return
 	}
 
@@ -76,9 +76,9 @@ func handlePASVCommand(conn *FTPServer, args []string) {
 	portHigh := port / 256
 	portLow := port % 256
 
-	conn.Write([]byte(fmt.Sprintf("227 Entering Passive Mode (%s,%s,%s,%s,%d,%d)\r\n", ipParts[0], ipParts[1], ipParts[2], ipParts[3], portHigh, portLow)))
+	_, _ = conn.Write([]byte(fmt.Sprintf("227 Entering Passive Mode (%s,%s,%s,%s,%d,%d)\r\n", ipParts[0], ipParts[1], ipParts[2], ipParts[3], portHigh, portLow)))
 	if conn.DataConn, err = conn.DataListener.Accept(); err != nil {
-		conn.Write([]byte("425 Can't open data connection\r\n"))
+		_, _ = conn.Write([]byte("425 Can't open data connection\r\n"))
 	}
 }
 
