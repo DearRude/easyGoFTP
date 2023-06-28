@@ -53,6 +53,7 @@ func main() {
 			MainDir:   filepath.Join(cur_dir, "files"),
 		}
 
+		// Handle the requests concurrently
 		go fs.HandleFTPCommands(&ftpConn)
 	}
 }
