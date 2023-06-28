@@ -1,54 +1,43 @@
-#+TITLE: FTP Server
+#+TITLE: EasyGoFtp
 
-* Description
-Provide a brief description of the FTP server project, its purpose, and its key features.
+[[https://github.com/DearRude/easygoftp/actions/workflows/master.yml/badge.svg]]
+[[https://img.shields.io/github/license/dearrude/easygoftp.svg]]
+[[https://img.shields.io/github/last-commit/dearrude/easygoftp.svg]]
 
-* Table of Contents
-Create a table of contents to help readers navigate the README easily. You can update the links as you add sections to the document.
+** Description
+~EasyGoFTP~ is an implementation of a simple FTP server in Go.
+It provides a lightweight and customizable server that allows clients to connect and perform various file transfer and management operations using the FTP protocol.
 
-** Installation
-** Usage
-** Configuration
-** Features
-** Examples
-** Contributing
-** License
+** Setup
+*** From source
+Have ~go 1.20~ installed in your system.
 
-* Installation
-Provide instructions on how to install and set up the FTP server.
+Make a config file and fill the specified units. Alternatively, configurations
+can be passed in CLI flags or environment variables.
+#+BEGIN_SRC sh
+$ cp .env.sample .env
+$ $EDITOR .env
+#+END_SRC
 
-** Prerequisites
-List any prerequisites or dependencies required to run the server, such as Go programming language and any external libraries.
+#+BEGIN_SRC sh
+$ go run .
+#+END_SRC
 
-** Installation Steps
-Provide step-by-step instructions to install and build the FTP server from the source code. Include any additional configuration steps if necessary.
+*** Docker
+#+BEGIN_SRC sh
+$ docker run ghcr.io/dearrude/easygoftp:latest
+#+END_SRC
 
-* Usage
-Explain how to start and use the FTP server.
+*** Nix
+To run:
+#+BEGIN_SRC sh
+$ nix run github.com/dearrude/easygoftp
+#+END_SRC
 
-** Starting the Server
-Describe how to start the FTP server, including any command-line options or configuration files.
+To set up development environment:
+#+BEGIN_SRC sh
+$ nix develop
+#+END_SRC
 
-** Connecting to the Server
-Explain how clients can connect to the server using an FTP client. Provide examples using popular FTP clients like `curl` or `FileZilla`.
-
-** Available Commands
-List and briefly describe the supported FTP commands and their functionality.
-
-* Configuration
-Explain the server's configuration options and how to customize them. Include details on configuration files, environment variables, or command-line arguments that can be used to modify the server's behavior.
-
-* Features
-Highlight the key features and functionalities of the FTP server. Describe any notable capabilities or unique aspects of the server.
-
-* Examples
-Provide usage examples or code snippets to demonstrate how to use specific features of the FTP server. Include any relevant details or explanations.
-
-* Contributing
-Explain how others can contribute to the project. Provide guidelines for reporting issues, submitting pull requests, and any coding conventions to follow. Include details on how to set up the development environment for contributors.
-
-* License
-Specify the license under which the FTP server project is released. Include the license text or a link to the full license file.
-
-* Contact Information
-Provide contact information or links to your project's website, documentation, or any other relevant resources.
+** Licence
+AGPLv3+
