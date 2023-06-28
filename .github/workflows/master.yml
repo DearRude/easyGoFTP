@@ -25,10 +25,9 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.20
-          cache: false
       - uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
+          version: v1.53
           args: --timeout=5m
 
   build-nix:
