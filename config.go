@@ -11,18 +11,20 @@ import (
 type Config struct {
 	UseTLS       bool
 	Domain       string
-	Port         int
+	FTPPort      int
+	WebPort      int
 	StderrLogger log.Logger
 	StdoutLogger log.Logger
 }
 
 func GenConfig() Config {
 	log.Println("Read configurations.")
-	fs := flag.NewFlagSet("mastodon_exporter", flag.ContinueOnError)
+	fs := flag.NewFlagSet("easygoftp", flag.ContinueOnError)
 	var (
-		useTLS = fs.Bool("useTLS", true, "if to use TLS for connections")
-		port   = fs.Int("port", 21, "default port of ftp server")
-		domain = fs.String("domain", "", "domain name for ftp server, necessary if useTLS is checked")
+		useTLS  = fs.Bool("useTLS", true, "if to use TLS for connections")
+		ftpPort = fs.Int("ftpPort", 21, "default port of ftp server")
+		webPort = fs.Int("webPort", 8080, "default port of web server")
+		domain  = fs.String("domain", "", "domain name for ftp server, necessary if useTLS is checked")
 	)
 
 	if _, err := os.Stat(".env"); os.IsNotExist(err) {
@@ -42,7 +44,8 @@ func GenConfig() Config {
 
 	return Config{
 		UseTLS:       *useTLS,
-		Port:         *port,
+		FTPPort:      *ftpPort,
+		WebPort:      *webPort,
 		Domain:       *domain,
 		StderrLogger: *log.New(os.Stderr, "", log.LstdFlags),
 		StdoutLogger: *log.New(os.Stderr, "", log.LstdFlags),

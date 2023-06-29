@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	fs "github.com/dearrude/easygoftp/ftpserver"
+	ws "github.com/dearrude/easygoftp/webserver"
 )
 
 func main() {
@@ -26,34 +27,41 @@ func main() {
 		tlsConfig = fs.GetTLSConfig(c.Domain)
 	}
 
+	// Init web server
+	go ws.Setup(c.WebPort, &c.StdoutLogger, &c.StderrLogger)
+
 	// Init FTP server
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", c.Port))
-	if err != nil {
-		c.StderrLogger.Println("Failed to start the FTP server on designated port:", err)
-		return
-	}
-	defer listener.Close()
-	c.StdoutLogger.Printf("FTP server started on port %d\n", c.Port)
-
-	for {
-		conn, err := listener.Accept()
+	go func() {
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", c.FTPPort))
 		if err != nil {
-			c.StderrLogger.Println("Connection could not be accepted", err)
-			continue
+			c.StderrLogger.Println("Failed to start the FTP server on designated port:", err)
+			return
 		}
-		c.StdoutLogger.Printf("Connection accepted from %s", conn.RemoteAddr())
-		_, _ = conn.Write([]byte("220 Service ready for new user\r\n"))
+		defer listener.Close()
+		c.StdoutLogger.Printf("FTP server started on port %d\n", c.FTPPort)
 
-		ftpConn := fs.FTPServer{
-			Logger:    &c.StdoutLogger,
-			ErrLogger: &c.StderrLogger,
-			UseTLS:    c.UseTLS,
-			TLSConf:   tlsConfig,
-			Conn:      conn,
-			MainDir:   filepath.Join(cur_dir, "files"),
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				c.StderrLogger.Println("Connection could not be accepted", err)
+				continue
+			}
+			c.StdoutLogger.Printf("Connection accepted from %s", conn.RemoteAddr())
+			_, _ = conn.Write([]byte("220 Service ready for new user\r\n"))
+
+			ftpConn := fs.FTPServer{
+				Logger:    &c.StdoutLogger,
+				ErrLogger: &c.StderrLogger,
+				UseTLS:    c.UseTLS,
+				TLSConf:   tlsConfig,
+				Conn:      conn,
+				MainDir:   filepath.Join(cur_dir, "files"),
+			}
+
+			// Handle the requests concurrently
+			go fs.HandleFTPCommands(&ftpConn)
 		}
+	}()
 
-		// Handle the requests concurrently
-		go fs.HandleFTPCommands(&ftpConn)
-	}
+	select {} // keep the main goroutine running
 }
