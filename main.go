@@ -28,7 +28,12 @@ func main() {
 	}
 
 	// Init web server
-	go ws.Setup(c.WebPort, &c.StdoutLogger, &c.StderrLogger)
+	go ws.Setup(
+		c.WebPort,
+		&c.StdoutLogger,
+		&c.StderrLogger,
+		filepath.Join(cur_dir, "files"),
+	)
 
 	// Init FTP server
 	go func() {
