@@ -57,6 +57,8 @@ func HandleFTPCommands(conn *FTPServer) {
 			handleMKDCommand(conn, args)
 		case "LIST":
 			handleLISTCommand(conn)
+		case "PWD":
+			handlePWDCommand(conn)
 		case "RETR":
 			handleRETRCommand(conn, args)
 		case "STOR":

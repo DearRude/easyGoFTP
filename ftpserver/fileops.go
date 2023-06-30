@@ -6,7 +6,21 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+func handlePWDCommand(conn *FTPServer) {
+	if conn.Username == "" {
+		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
+		return
+	}
+	relativePath := strings.TrimPrefix(conn.CurrDir, conn.MainDir)
+	if relativePath == "" {
+		relativePath = "/"
+	}
+
+	_, _ = conn.Write([]byte(fmt.Sprintf("257 \"%s\" is the current directory\r\n", relativePath)))
+}
 
 func handleLISTCommand(conn *FTPServer) {
 	if conn.Username == "" {
