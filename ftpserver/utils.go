@@ -6,7 +6,7 @@ import (
 )
 
 func handleTYPECommand(conn *FTPServer, args []string) {
-	if !IsAuthenticated(conn) {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -32,7 +32,7 @@ func handleTYPECommand(conn *FTPServer, args []string) {
 }
 
 func handleSYSTCommand(conn *FTPServer) {
-	if !IsAuthenticated(conn) {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}

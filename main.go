@@ -66,6 +66,7 @@ func main() {
 				TLSConf:   tlsConfig,
 				Conn:      conn,
 				MainDir:   filepath.Join(cur_dir, "files"),
+				DB:        db,
 			}
 
 			// Handle the requests concurrently

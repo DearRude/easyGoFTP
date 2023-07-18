@@ -8,7 +8,7 @@ import (
 
 // handleCWDCommand handles the CWD command
 func handleCWDCommand(conn *FTPServer, args []string) {
-	if !IsAuthenticated(conn) {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -51,7 +51,7 @@ func updateWorkingDir(conn *FTPServer, targetDir string) bool {
 
 // handleMKDCommand handles the MKD command
 func handleMKDCommand(conn *FTPServer, args []string) {
-	if !IsAuthenticated(conn) {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}

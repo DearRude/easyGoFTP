@@ -8,13 +8,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Store hashed passwords for user accounts
-var userPasswords = map[string]string{
-	"user_1": "$2a$10$yolHY3AWMRzWrIXIhtAv6uMB/gvyqpD4I.SAmMvGZIMa3.hievNT6",
-	"user_2": "$2a$10$NLbsJ2KpLyVsvSZ0yVfiY.UgwL9NNvi0VVtDOoz5s3352A3rU2LCS",
-	"user_3": "$2a$10$4St/8SvmVkzrWkkau67pl.lRJ5E9iMxmOnY5LAIJabpVGANgXrhsa",
-}
-
 func handleUSERCommand(conn *FTPServer, args []string) {
 	if len(args) < 1 {
 		_, _ = conn.Write([]byte("501 Syntax error in parameters\r\n"))
@@ -23,9 +16,8 @@ func handleUSERCommand(conn *FTPServer, args []string) {
 
 	username := args[0]
 
-	// Check if the username exists in the password database
-	_, ok := userPasswords[username]
-	if !ok {
+	_, err := conn.DB.Exec("SELECT id FROM users WHERE username = ?", username)
+	if err != nil {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -45,16 +37,14 @@ func handlePASSCommand(conn *FTPServer, args []string) {
 
 	password := args[0]
 
-	// Retrieve the previously stored hashed password for the user
-	hashedPassword, ok := userPasswords[conn.Username]
-	if !ok {
+	var hashedPassword string
+	if err := conn.DB.QueryRow("SELECT password FROM users WHERE username = ?", conn.Username).Scan(&hashedPassword); err != nil {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
 
 	// Compare the provided password with the stored hashed password
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)); err != nil {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -75,12 +65,7 @@ func handlePASSCommand(conn *FTPServer, args []string) {
 		conn.CurrDir = user_dir
 	}
 
+	conn.IsAuthed = true
 	log.Printf("Connection authenticaed with username %s", conn.Username)
 	_, _ = conn.Write([]byte("230 User logged in, proceed\r\n"))
-}
-
-func IsAuthenticated(conn *FTPServer) bool {
-	// Check if the username exists in the password database
-	_, ok := userPasswords[conn.Username]
-	return ok
 }

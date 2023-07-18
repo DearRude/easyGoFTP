@@ -10,7 +10,7 @@ import (
 )
 
 func handlePWDCommand(conn *FTPServer) {
-	if conn.Username == "" {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -23,7 +23,7 @@ func handlePWDCommand(conn *FTPServer) {
 }
 
 func handleLISTCommand(conn *FTPServer) {
-	if conn.Username == "" {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -56,7 +56,7 @@ func handleLISTCommand(conn *FTPServer) {
 }
 
 func handleRETRCommand(conn *FTPServer, args []string) {
-	if conn.Username == "" {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}
@@ -129,7 +129,7 @@ func handleRETRCommand(conn *FTPServer, args []string) {
 }
 
 func handleSTORCommand(conn *FTPServer, args []string) {
-	if conn.Username == "" {
+	if !conn.IsAuthed {
 		_, _ = conn.Write([]byte("530 Not logged in\r\n"))
 		return
 	}

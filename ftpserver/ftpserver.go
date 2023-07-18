@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"bufio"
+	"database/sql"
 	"log"
 	"strings"
 )
@@ -26,6 +27,9 @@ type FTPServer struct {
 	MainDir      string
 	CurrDir      string
 	TransferMode string
+
+	DB       *sql.DB
+	IsAuthed bool
 }
 
 // handleFTPCommands handles the FTP commands received on the connection
