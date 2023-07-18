@@ -27,7 +27,7 @@ files/
 docs/
 
 # databases
-db/
+*.db
 
 
 # Env file

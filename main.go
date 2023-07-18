@@ -22,8 +22,8 @@ func main() {
 		return
 	}
 
-	dbAPI := initDb(cur_dir)
-	fmt.Println(dbAPI)
+	db := initDb(cur_dir)
+	defer db.Close()
 
 	// If secure, handle TLS
 	tlsConfig := &tls.Config{}
@@ -37,6 +37,7 @@ func main() {
 		&c.StdoutLogger,
 		&c.StderrLogger,
 		filepath.Join(cur_dir, "files"),
+		db,
 	)
 
 	// Init FTP server
