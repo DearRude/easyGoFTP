@@ -1,15 +1,93 @@
 schema = 3
 
 [mod]
+  [mod."github.com/dustin/go-humanize"]
+    version = "v1.0.1"
+    hash = "sha256-yuvxYYngpfVkUg9yAmG99IUVmADTQA0tMbBXe0Fq0Mc="
+  [mod."github.com/golang-jwt/jwt"]
+    version = "v3.2.2+incompatible"
+    hash = "sha256-LOkpuXhWrFayvVf1GOaOmZI5YKEsgqVSb22aF8LnCEM="
+  [mod."github.com/google/uuid"]
+    version = "v1.3.0"
+    hash = "sha256-QoR55eBtA94T2tBszyxfDtO7/pjZZSGb5vm7U0Xhs0Y="
+  [mod."github.com/kballard/go-shellquote"]
+    version = "v0.0.0-20180428030007-95032a82bc51"
+    hash = "sha256-AOEdKETBMUC39ln6jBJ9NYdJWp++jV5lSbjNqG3dV+c="
+  [mod."github.com/labstack/echo/v4"]
+    version = "v4.11.1"
+    hash = "sha256-uh9C25LiHvevbedA4pU9wgsZpHmjj+KohzNjS8gV2ls="
+  [mod."github.com/labstack/gommon"]
+    version = "v0.4.0"
+    hash = "sha256-xISAIJEu2xh0hoWsORbgjnz3rDK3ft3hrvmxt0wfHVw="
+  [mod."github.com/mattn/go-colorable"]
+    version = "v0.1.13"
+    hash = "sha256-qb3Qbo0CELGRIzvw7NVM1g/aayaz4Tguppk9MD2/OI8="
+  [mod."github.com/mattn/go-isatty"]
+    version = "v0.0.19"
+    hash = "sha256-wYQqGxeqV3Elkmn26Md8mKZ/viw598R4Ych3vtt72YE="
+  [mod."github.com/mattn/go-sqlite3"]
+    version = "v1.14.17"
+    hash = "sha256-ictf2uCW2AnQbykhI0kKPXwzHQlbHHZflZgvpqGFquY="
   [mod."github.com/peterbourgon/ff/v3"]
     version = "v3.3.2"
     hash = "sha256-xoUqKcCpPgUY/Fi9bzZGR/Eir5UDSCK6No3YXpTd4YM="
+  [mod."github.com/remyoudompheng/bigfft"]
+    version = "v0.0.0-20230129092748-24d4a6f8daec"
+    hash = "sha256-vYmpyCE37eBYP/navhaLV4oX4/nu0Z/StAocLIFqrmM="
+  [mod."github.com/valyala/bytebufferpool"]
+    version = "v1.0.0"
+    hash = "sha256-I9FPZ3kCNRB+o0dpMwBnwZ35Fj9+ThvITn8a3Jr8mAY="
+  [mod."github.com/valyala/fasttemplate"]
+    version = "v1.2.2"
+    hash = "sha256-gp+lNXE8zjO+qJDM/YbS6V43HFsYP6PKn4ux1qa5lZ0="
   [mod."golang.org/x/crypto"]
-    version = "v0.9.0"
-    hash = "sha256-RpGvWrx96GBXpu1zsWxdv9/+WcRmjBxOC7fvSgOJGL0="
+    version = "v0.11.0"
+    hash = "sha256-aFI8cpvSZRiQO2HQm6+a4e9OiSf7GUfj69SSta2iZ44="
+  [mod."golang.org/x/mod"]
+    version = "v0.8.0"
+    hash = "sha256-cgtmxQA937+MdXUiPrVeDvRoqhxD4hvIbtXAjK2SM8U="
   [mod."golang.org/x/net"]
+    version = "v0.12.0"
+    hash = "sha256-zQZBj42+wLLxXwS/e+KNbu8+SukMDxxW23WSi5XQXAA="
+  [mod."golang.org/x/sys"]
     version = "v0.10.0"
-    hash = "sha256-HkGiUYBZOBdOtt7mYo3N3swFjjAXzW++pG2JeWGJR9Q="
+    hash = "sha256-eeifyHj8IcTAruekJAGMCcjFyU2GAIAgvxS36hPZM1U="
   [mod."golang.org/x/text"]
-    version = "v0.9.0"
-    hash = "sha256-tkhDeMsSQZr3jo7vmKehWs3DvWetwXR0IB+DCLbQ4nk="
+    version = "v0.11.0"
+    hash = "sha256-W/XvTPAGIOlFVwZ7rTaEid7pdRtb4wc6a+nyOW99/ks="
+  [mod."golang.org/x/time"]
+    version = "v0.3.0"
+    hash = "sha256-/hmc9skIswMYbivxNS7R8A6vCTUF9k2/7tr/ACkcEaM="
+  [mod."golang.org/x/tools"]
+    version = "v0.6.0"
+    hash = "sha256-J0q+C3WDTK9yyHX90FV6qr6n9H07YglYg1p4H3MqyH4="
+  [mod."lukechampine.com/uint128"]
+    version = "v1.2.0"
+    hash = "sha256-gwpTC3V+1pxjzxZvCnum+qpaGD84WtHncywddTSPye4="
+  [mod."modernc.org/cc/v3"]
+    version = "v3.40.0"
+    hash = "sha256-s7KmY6n9S4JfP03mJ58OYJJYLLgL7iBcTf+uAqxR3rM="
+  [mod."modernc.org/ccgo/v3"]
+    version = "v3.16.13"
+    hash = "sha256-4bBUzkL+uXQ4Pe9BZjCj4PuJ8pR+8lC6+aQhC1z8iQw="
+  [mod."modernc.org/libc"]
+    version = "v1.22.5"
+    hash = "sha256-w0soaKVp9cKJ0PYzm7kn1Lji0T1n/0doJDc605ENJ0w="
+  [mod."modernc.org/mathutil"]
+    version = "v1.5.0"
+    hash = "sha256-5xM9HjjHf9sB0vLfN53PdGpT0qPF1+KI1/lgN0/4LQo="
+  [mod."modernc.org/memory"]
+    version = "v1.5.0"
+    hash = "sha256-n6Eifn+TmwHxVCe1a0z9NMsvbEswMsH5ES/UTI3HLIA="
+  [mod."modernc.org/opt"]
+    version = "v0.1.3"
+    hash = "sha256-7C/odVzq+jp8aP6zbwH2cp8r4fxZ3nfQ4Cz3p9cshHE="
+  [mod."modernc.org/sqlite"]
+    version = "v1.24.0"
+    hash = "sha256-FsgCPARR5WX8QknkvK7ag8a3nWSfy5WjGiVjACieAWc="
+  [mod."modernc.org/strutil"]
+    version = "v1.1.3"
+    hash = "sha256-uEGJcwaeeN7cy62v06HoRdHB1p14McdlPID8QGJQd4k="
+  [mod."modernc.org/token"]
+    version = "v1.0.1"
+    hash = "sha256-lTSZX8nrb5hDZqOnRuFmI4VIaco3qwwWe28z24vohyo="

@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func initDb(curent_dir string) *sql.DB {
 	dbPath := filepath.Join(curent_dir, "data.db")
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		panic(err)
 	}

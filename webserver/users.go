@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -49,11 +48,6 @@ func createUser(c echo.Context) error {
 	// Insert the user into the database
 	result, err := db.Exec("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", user.Username, hashedPassword, user.Role)
 	if err != nil {
-		if sqliteErr, ok := err.(sqlite3.Error); ok {
-			if sqliteErr.Code == sqlite3.ErrConstraint {
-				return echo.NewHTTPError(http.StatusConflict, "User is already present")
-			}
-		}
 		return err
 	}
 
