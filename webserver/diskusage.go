@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/labstack/echo/v4"
 )
 
 type DiskUsageResponse struct {
@@ -12,11 +14,10 @@ type DiskUsageResponse struct {
 	Error     string `json:"error,omitempty"`
 }
 
-func diskUsageHandler(w http.ResponseWriter, r *http.Request) {
-	directory := r.URL.Query().Get("directory")
+func diskUsageHandler(c echo.Context) error {
+	directory := c.Param("path")
 	if directory == "" {
-		http.Error(w, "Directory parameter is required", http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "Directory parameter is required")
 	}
 
 	responseChan := make(chan DiskUsageResponse)
@@ -33,7 +34,7 @@ func diskUsageHandler(w http.ResponseWriter, r *http.Request) {
 		responseChan <- response
 	}()
 
-	sendJSONResponse(w, <-responseChan)
+	return c.JSON(http.StatusOK, <-responseChan)
 }
 
 func calculateDiskUsage(directory string) (int64, error) {

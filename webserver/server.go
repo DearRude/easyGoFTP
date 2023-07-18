@@ -3,34 +3,47 @@ package webserver
 import (
 	"net/http"
 
-	"encoding/json"
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
 	logger    *log.Logger
 	errLogger *log.Logger
 	cwd       string
+	db        *sql.DB
 )
 
-func Setup(port int, stdLogger *log.Logger, errorLogger *log.Logger, curr_dir string) {
+func Setup(port int, stdLogger *log.Logger, errorLogger *log.Logger, curr_dir string, database *sql.DB) {
 	logger = stdLogger
 	errLogger = errorLogger
 	cwd = curr_dir
+	db = database
 
-	http.HandleFunc("/api/ping", pingHandler)
+	e := echo.New()
+	api := e.Group("/api")
 
-	http.HandleFunc("/api/disk-usage", diskUsageHandler)
-	http.HandleFunc("/api/directory-content", directoryContentHandler)
-	http.HandleFunc("/api/file-info", fileInfoHandler)
+	api.Use(middleware.BasicAuth(loginAdmin))
+
+	api.GET("/ping", pingHandler)
+
+	api.GET("/disk-usage/:path", diskUsageHandler)
+	api.GET("/directory-content/:path", directoryContentHandler)
+	api.GET("/file-info/:path", fileInfoHandler)
+
+	api.POST("/users", createUser)
+	api.GET("/users/:id", getUser)
+	api.PUT("/users/:id", updateUser)
+	api.DELETE("/users/:id", deleteUser)
 
 	logger.Printf("Web server started on port %d\n", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
-	if err != nil {
-		errLogger.Println("Failed to start the webserver on designated port:", err)
-		return
+	if err := e.Start(fmt.Sprintf(":%d", port)); err != nil {
+		errLogger.Fatalf("Failed to start the webserver on designated port: %v", err)
 	}
 }
 
@@ -39,21 +52,12 @@ type PingResponse struct {
 	ElapsedTime time.Duration `json:"elapsedTime"`
 }
 
-func pingHandler(w http.ResponseWriter, r *http.Request) {
-	startTime := time.Now()
+func pingHandler(c echo.Context) error {
+	start := time.Now()
 
-	response := PingResponse{
-		Message:     "pong",
-		ElapsedTime: time.Since(startTime),
+	resp := map[string]interface{}{
+		"message": "Pong!",
+		"delay":   time.Since(start).String(),
 	}
-
-	sendJSONResponse(w, response)
-}
-
-func sendJSONResponse(w http.ResponseWriter, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(data)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to encode JSON response: %s", err), http.StatusInternalServerError)
-	}
+	return c.JSON(http.StatusOK, resp)
 }

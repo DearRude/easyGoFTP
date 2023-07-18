@@ -3,8 +3,9 @@ package webserver
 import (
 	"net/http"
 	"os"
-
 	"path/filepath"
+
+	"github.com/labstack/echo/v4"
 )
 
 type DirectoryContentResponse struct {
@@ -13,11 +14,10 @@ type DirectoryContentResponse struct {
 	Error     string     `json:"error,omitempty"`
 }
 
-func directoryContentHandler(w http.ResponseWriter, r *http.Request) {
-	directory := r.URL.Query().Get("directory")
+func directoryContentHandler(c echo.Context) error {
+	directory := c.Param("path")
 	if directory == "" {
-		http.Error(w, "Directory parameter is required", http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "Directory parameter is required")
 	}
 
 	responseChan := make(chan DirectoryContentResponse)
@@ -34,7 +34,7 @@ func directoryContentHandler(w http.ResponseWriter, r *http.Request) {
 		responseChan <- response
 	}()
 
-	sendJSONResponse(w, <-responseChan)
+	return c.JSON(http.StatusOK, <-responseChan)
 }
 
 func getDirectoryContent(directory string) ([]FileInfo, error) {

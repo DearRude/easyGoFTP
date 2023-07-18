@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/labstack/echo/v4"
 )
 
 type FileInfo struct {
@@ -19,11 +21,10 @@ type FileInfoResponse struct {
 	Error    string   `json:"error,omitempty"`
 }
 
-func fileInfoHandler(w http.ResponseWriter, r *http.Request) {
-	filePath := r.URL.Query().Get("file")
+func fileInfoHandler(c echo.Context) error {
+	filePath := c.Param("path")
 	if filePath == "" {
-		http.Error(w, "File parameter is required", http.StatusBadRequest)
-		return
+		return echo.NewHTTPError(http.StatusBadRequest, "File parameter is required")
 	}
 
 	responseChan := make(chan FileInfoResponse)
@@ -39,7 +40,7 @@ func fileInfoHandler(w http.ResponseWriter, r *http.Request) {
 		responseChan <- response
 	}()
 
-	sendJSONResponse(w, <-responseChan)
+	return c.JSON(http.StatusOK, <-responseChan)
 }
 
 func getFileInformation(filePath string) (FileInfo, error) {
