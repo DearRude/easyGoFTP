@@ -15,11 +15,15 @@ import (
 func main() {
 	c := GenConfig()
 
+	// Get current directory
 	cur_dir, err := os.Getwd()
 	if err != nil {
 		c.StderrLogger.Println("Failed to get current directory:", err)
 		return
 	}
+
+	dbAPI := initDb(cur_dir)
+	fmt.Println(dbAPI)
 
 	// If secure, handle TLS
 	tlsConfig := &tls.Config{}

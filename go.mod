@@ -3,6 +3,8 @@ module github.com/dearrude/easygoftp
 go 1.20
 
 require (
+	github.com/gorilla/mux v1.8.0
+	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/peterbourgon/ff/v3 v3.3.2
 	golang.org/x/crypto v0.9.0
 )
