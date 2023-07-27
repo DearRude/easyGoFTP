@@ -22,7 +22,11 @@ func main() {
 		return
 	}
 
-	db := initDb(cur_dir)
+	// Inilize the database
+	db, err := initDb(cur_dir, c.DbAdminName, c.DbAdminPass)
+	if err != nil {
+		c.StderrLogger.Println("Failed to init the db: ", err)
+	}
 	defer db.Close()
 
 	// If secure, handle TLS

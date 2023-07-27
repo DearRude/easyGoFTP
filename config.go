@@ -9,10 +9,15 @@ import (
 )
 
 type Config struct {
-	UseTLS       bool
-	Domain       string
-	FTPPort      int
-	WebPort      int
+	UseTLS bool
+	Domain string
+
+	DbAdminName string
+	DbAdminPass string
+
+	FTPPort int
+	WebPort int
+
 	StderrLogger log.Logger
 	StdoutLogger log.Logger
 }
@@ -21,10 +26,12 @@ func GenConfig() Config {
 	log.Println("Read configurations.")
 	fs := flag.NewFlagSet("easygoftp", flag.ContinueOnError)
 	var (
-		useTLS  = fs.Bool("useTLS", true, "if to use TLS for connections")
-		ftpPort = fs.Int("ftpPort", 21, "default port of ftp server")
-		webPort = fs.Int("webPort", 8080, "default port of web server")
-		domain  = fs.String("domain", "", "domain name for ftp server, necessary if useTLS is checked")
+		domain      = fs.String("domain", "", "domain name for ftp server, necessary if useTLS is checked")
+		useTLS      = fs.Bool("useTLS", true, "if to use TLS for connections")
+		dbAdminName = fs.String("dbAdminName", "admin", "default admin username for webserver")
+		dbAdminPass = fs.String("dbAdminPass", "admin", "default admin password for webserver")
+		ftpPort     = fs.Int("ftpPort", 21, "default port of ftp server")
+		webPort     = fs.Int("webPort", 8080, "default port of web server")
 	)
 
 	if _, err := os.Stat(".env"); os.IsNotExist(err) {
@@ -47,6 +54,8 @@ func GenConfig() Config {
 		FTPPort:      *ftpPort,
 		WebPort:      *webPort,
 		Domain:       *domain,
+		DbAdminName:  *dbAdminName,
+		DbAdminPass:  *dbAdminPass,
 		StderrLogger: *log.New(os.Stderr, "", log.LstdFlags),
 		StdoutLogger: *log.New(os.Stderr, "", log.LstdFlags),
 	}
