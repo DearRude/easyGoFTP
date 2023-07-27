@@ -31,7 +31,7 @@ $ docker run ghcr.io/dearrude/easygoftp:latest
 *** Nix
 To run:
 #+BEGIN_SRC sh
-$ nix run github.com/dearrude/easygoftp
+$ nix run github:dearrude/easygoftp
 #+END_SRC
 
 To set up development environment:
