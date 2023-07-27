@@ -21,7 +21,8 @@ func getUser(c echo.Context) error {
 
 	// Query the database for the user
 	var userDetail User
-	err := db.QueryRow("SELECT id, username, role FROM users WHERE id = ?", id).Scan(&userDetail.ID, &userDetail.Username, &userDetail.Role)
+	err := db.QueryRow("SELECT id, username, role FROM users WHERE id = ?", id).Scan(
+		&userDetail.ID, &userDetail.Username, &userDetail.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return echo.NewHTTPError(http.StatusNotFound, "User not found")
@@ -46,7 +47,8 @@ func createUser(c echo.Context) error {
 	}
 
 	// Insert the user into the database
-	result, err := db.Exec("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", user.Username, hashedPassword, user.Role)
+	result, err := db.Exec("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+		user.Username, hashedPassword, user.Role)
 	if err != nil {
 		return err
 	}
@@ -77,7 +79,8 @@ func updateUser(c echo.Context) error {
 	}
 
 	// Update the user in the database
-	_, err := db.Exec("UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?", user.Username, user.Password, user.Role, id)
+	_, err := db.Exec("UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?",
+		user.Username, user.Password, user.Role, id)
 	if err != nil {
 		return err
 	}
